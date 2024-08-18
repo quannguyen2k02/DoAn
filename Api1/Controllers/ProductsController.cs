@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
 using Api1.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api1.Controllers
 {
@@ -23,6 +24,7 @@ namespace Api1.Controllers
 
         // GET: api/Products
         [HttpGet]
+        [Authorize(Roles =AppRole.Customer)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
           if (_context.Products == null)
