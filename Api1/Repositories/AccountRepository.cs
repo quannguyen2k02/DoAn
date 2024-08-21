@@ -36,8 +36,8 @@ namespace Api1.Repositories
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, model.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
             };
             var userRoles = await userManager.GetRolesAsync(user);
             foreach (var role in userRoles)

@@ -24,13 +24,12 @@ namespace Api1.Controllers
 
         // GET: api/Products
         [HttpGet]
-        [Authorize(Roles =AppRole.Customer)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-          if (_context.Products == null)
-          {
-              return NotFound();
-          }
+            if (_context.Products == null)
+            {
+                return NotFound();
+            }
             var url = "https://localhost:7061/static/Contents/Images/Products/";
             foreach (var product in _context.Products)
             {
@@ -90,6 +89,27 @@ namespace Api1.Controllers
             }
 
             return await list.ToListAsync();
+        }
+        [HttpGet("FindByName/{q}")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByName(string q)
+        {
+            if (string.IsNullOrEmpty(q))
+            {
+                return NoContent();
+            }
+
+            var products = _context.Products.Where(x => x.Title.Contains(q));
+            if(products == null)
+            {
+                return NoContent();
+            }
+            string url = "https://localhost:7061/static/Contents/Images/Products/";
+
+            foreach (var product in products)
+            {
+                product.Image = url + product.Image;
+            }
+            return await products.ToListAsync();
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProductByCategoryId(int id)
