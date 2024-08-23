@@ -62,11 +62,11 @@ builder.Services.AddDbContext<BanHangContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyDb"));
 });
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-    });
+//builder.Services.AddControllers()
+//    .AddJsonOptions(options =>
+//    {
+//        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+//    });
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
