@@ -20,4 +20,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Payment\Momo\Lib\" />
+    <Folder Include="Payment\Momo\Response\" />
+    <Folder Include="Payment\Momo\Request\" />
+  </ItemGroup>
+
 </Project>

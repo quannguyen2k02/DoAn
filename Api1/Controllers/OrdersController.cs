@@ -25,40 +25,26 @@ namespace Api1.Controllers
             _userManager = userManager;
         }
 
-
-         [HttpPost]
+        [HttpPost]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest orderRequest)
+        public async Task<IActionResult> CreateOrder([FromBody] OrderDTO orderDto)
         {
-            // Lấy UserId từ token đã xác thực
             var userId = _userManager.GetUserId(User);
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
-
-            // Tạo order mới
+            // Tạo order mới từ DTO
             var order = new Order
             {
                 CustomerId = userId,
-                CustomerName = orderRequest.CustomerName,
-                Phone = orderRequest.Phone,
-                Address = orderRequest.Address,
-                Email = orderRequest.Email,
-                TotalAmount = orderRequest.Items.Sum(item => item.Quantity * (_context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.Price ?? 0)),
-                Quantity = orderRequest.Items.Sum(item => item.Quantity),
-                TypePayment = orderRequest.TypePayment,
-                Status = 1, // Ví dụ: Trạng thái mới
-                CreatedDate = DateTime.Now,
-                ModifiedDate = DateTime.Now,
-                OrderDetails = orderRequest.Items.Select(item => new OrderDetail
+                CustomerName = orderDto.CustomerName,
+                Phone = orderDto.Phone,
+                Address = orderDto.Address,
+                CreatedDate = DateTime.UtcNow,
+                Email = orderDto.Email,
+                TotalAmount = orderDto.Items.Sum(item => item.Quantity * (_context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.PriceSale ?? 0)),
+                OrderDetails = orderDto.Items.Select(item => new OrderDetail
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    Price = _context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.Price ?? 0,
-                    CreatedDate = DateTime.Now,
-                    ModifiedDate = DateTime.Now,
+                    Price = _context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.PriceSale ?? 0
                 }).ToList()
             };
 
@@ -68,7 +54,10 @@ namespace Api1.Controllers
 
             return Ok(order);
         }
-
-
     }
 }
+
+
+
+
+
