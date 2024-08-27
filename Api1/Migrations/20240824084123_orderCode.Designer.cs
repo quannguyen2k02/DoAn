@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api1.Migrations
 {
     [DbContext(typeof(BanHangContext))]
-    [Migration("20240820163409_update-order")]
-    partial class updateorder
+    [Migration("20240824084123_orderCode")]
+    partial class orderCode
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -105,12 +105,13 @@ namespace Api1.Migrations
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("OrderCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");

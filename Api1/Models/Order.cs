@@ -12,6 +12,7 @@ namespace API.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public string OrderCode { get; set; }
         [Required(ErrorMessage = "Số điện thoại không để trống")]
         public string CustomerName { get; set; }
         [Required(ErrorMessage = "Số điện thoại không để trống")]
@@ -22,6 +23,7 @@ namespace API.Models
         public decimal TotalAmount { get; set; }
         public int TypePayment { get; set; }
         public int Status { get; set; }
+
         public ICollection<OrderDetail> OrderDetails { get; set; }
         public string CustomerId { set;get; }
     }

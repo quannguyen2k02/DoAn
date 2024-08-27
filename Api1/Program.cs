@@ -1,5 +1,7 @@
 using Api1.Data;
+using Api1.Models.Momo;
 using Api1.Repositories;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +86,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
 });
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
 
