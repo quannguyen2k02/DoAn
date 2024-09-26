@@ -51,49 +51,67 @@ namespace Api1.Controllers
             {
                 return NotFound();
             }
+            var url = "https://localhost:7061/static/Contents/Images/ProductCategories/";
+            productCategory.Image = url + productCategory.Image;
             return productCategory;
         }
 
         // PUT: api/ProductCategories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductCategory(int id, ProductCategory productCategory)
+        [HttpPut]
+        public async Task<IActionResult> PutProductCategory( [FromForm] ProductCategoryDTO productCategoryDTO)
         {
-            if (id != productCategory.Id)
+            var category = _context.ProductCategories.FirstOrDefault(x=>x.Id == productCategoryDTO.Id);
+            if (_context.ProductCategories == null)
             {
-                return BadRequest();
+                return Problem("Entity set 'BanHangContext.ProductCategories'  is null.");
             }
-
-            _context.Entry(productCategory).State = EntityState.Modified;
-
-            try
+            string image = category.Image;
+            if (productCategoryDTO.Image != null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductCategoryExists(id))
+                var imagePath = Path.Combine("StaticFiles/Contents/Images/ProductCategories", productCategoryDTO.Image.FileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    await productCategoryDTO.Image.CopyToAsync(stream);
+                    image = productCategoryDTO.Image.FileName;
                 }
             }
 
+            category.Title = productCategoryDTO.Title;
+            category.Description = productCategoryDTO.Description;
+            category.ModifiedDate = DateTime.Now;
+            category.Image = image;
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         // POST: api/ProductCategories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ProductCategory>> PostProductCategory(ProductCategory productCategory)
+        [Route("AddCategory")]
+        public async Task<ActionResult<ProductCategory>> PostProductCategory([FromForm]ProductCategoryDTO productCategoryDTO)
         {
           if (_context.ProductCategories == null)
           {
               return Problem("Entity set 'BanHangContext.ProductCategories'  is null.");
           }
+            string image = "";
+          if(productCategoryDTO.Image != null)
+            {
+                var imagePath = Path.Combine("StaticFiles/Contents/Images/ProductCategories", productCategoryDTO.Image.FileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await productCategoryDTO.Image.CopyToAsync(stream);
+                    image = productCategoryDTO.Image.FileName;
+                }
+            }
+            var productCategory = new ProductCategory();
+            productCategory.Title = productCategoryDTO.Title;
+            productCategory.Description = productCategoryDTO.Description;
+            productCategory.CreatedDate = DateTime.Now;
+            productCategory.Image = image;
             _context.ProductCategories.Add(productCategory);
             await _context.SaveChangesAsync();
 

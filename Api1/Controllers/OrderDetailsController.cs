@@ -33,21 +33,24 @@ namespace Api1.Controllers
         }
 
         // GET: api/OrderDetails/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetail>> GetOrderDetail(int id)
+        [HttpGet("orderdetails/{orderid}")]
+        public async Task<ActionResult<IEnumerable<OrderDetail>>> GetOrderDetailsByOrderId(int orderid)
         {
-          if (_context.OrderDetails == null)
-          {
-              return NotFound();
-          }
-            var orderDetail = await _context.OrderDetails.FindAsync(id);
-
-            if (orderDetail == null)
+            if (_context.OrderDetails == null)
             {
                 return NotFound();
             }
 
-            return orderDetail;
+            var orderDetails = await _context.OrderDetails
+                                             .Where(x => x.OrderId == orderid)
+                                             .ToListAsync();
+
+            if (!orderDetails.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(orderDetails);
         }
 
         // PUT: api/OrderDetails/5

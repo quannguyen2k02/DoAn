@@ -17,6 +17,7 @@ namespace Api1.Data
         public DbSet<ProductCategory> ProductCategories { get; set; }
         public DbSet<Subcribe> Subcribes  { get; set; }
         public DbSet<SaleInfor> SaleInfors { get; set; }
+        public DbSet<Response> Responses { get; set; }
     }
 }
 

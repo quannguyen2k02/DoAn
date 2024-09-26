@@ -32,10 +32,11 @@ namespace Api1.Controllers
             var result = await accountRepo.SignInAsync(signInModel);
             if (string.IsNullOrEmpty(result))
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin." });
             }
 
             return Ok(result);
         }
+
     }
 }

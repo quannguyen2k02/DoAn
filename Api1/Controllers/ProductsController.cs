@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using API.Models;
 using Api1.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Hosting;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Api1.Controllers
 {
@@ -23,20 +25,60 @@ namespace Api1.Controllers
         }
 
         // GET: api/Products
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        //{
+        //    if (_context.Products == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var url = "https://localhost:7061/static/Contents/Images/Products/";
+        //    foreach (var product in _context.Products)
+        //    {
+        //        product.Image = url + product.Image;
+        //    }
+
+        //    return await _context.Products.ToListAsync();
+        //}
+
+        [HttpGet("GetAllProducts")]
+        public async Task<ActionResult> GetAllProducts(int pageNumber = 1, int pageSize = 8)
         {
             if (_context.Products == null)
             {
                 return NotFound();
             }
+
             var url = "https://localhost:7061/static/Contents/Images/Products/";
-            foreach (var product in _context.Products)
+
+            // Tính tổng số sản phẩm
+            var totalProducts = await _context.Products.CountAsync();
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            // Lấy danh sách sản phẩm theo phân trang
+            var products = await _context.Products
+                                         .Skip((pageNumber - 1) * pageSize)
+                                         .Take(pageSize)
+                                         .ToListAsync();
+
+            // Gắn URL ảnh vào sản phẩm
+            foreach (var product in products)
             {
                 product.Image = url + product.Image;
             }
 
-            return await _context.Products.ToListAsync();
+            // Tạo đối tượng trả về bao gồm danh sách sản phẩm và số trang
+            var result = new
+            {
+                Products = products,
+                TotalPages = totalPages,
+                CurrentPage = pageNumber,
+                PageSize = pageSize
+            };
+
+            return Ok(result);
         }
 
         [HttpGet("HotProducts")]
@@ -74,45 +116,131 @@ namespace Api1.Controllers
         }
 
         // GET: api/Products/5
+        //[HttpGet("ProductsByCategory/{id}")]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategoryId(int id)
+        //{
+        //    if (_context.Products == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var url = "https://localhost:7061/static/Contents/Images/Products/";
+        //    var list = _context.Products.Where(x => x.ProductCategoryId == id);
+        //    foreach (var product in list)
+        //    {
+        //        product.Image = url + product.Image;
+        //    }
+
+        //    return await list.ToListAsync();
+        //}
         [HttpGet("ProductsByCategory/{id}")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategoryId(int id)
+        public async Task<ActionResult> GetProductsByCategoryId(int id, int pageNumber = 1, int pageSize = 8)
         {
             if (_context.Products == null)
             {
                 return NotFound();
             }
+
             var url = "https://localhost:7061/static/Contents/Images/Products/";
+
+            // Lọc sản phẩm theo CategoryId
             var list = _context.Products.Where(x => x.ProductCategoryId == id);
-            foreach (var product in list)
+
+            // Tính tổng số sản phẩm
+            var totalProducts = await list.CountAsync();
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            // Tính toán số sản phẩm bỏ qua
+            var skip = (pageNumber - 1) * pageSize;
+
+            // Lấy danh sách sản phẩm theo phân trang
+            var paginatedList = await list.Skip(skip).Take(pageSize).ToListAsync();
+
+            // Gắn URL ảnh vào sản phẩm
+            foreach (var product in paginatedList)
             {
                 product.Image = url + product.Image;
             }
 
-            return await list.ToListAsync();
+            // Tạo đối tượng trả về bao gồm danh sách sản phẩm và số trang
+            var result = new
+            {
+                Products = paginatedList,
+                TotalPages = totalPages,
+                CurrentPage = pageNumber,
+                PageSize = pageSize
+            };
+
+            return Ok(result);
         }
         [HttpGet("FindByName/{q}")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByName(string q)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByName(string q, int pageNumber = 1, int pageSize = 8)
         {
+            //if (string.IsNullOrEmpty(q))
+            //{
+            //    return NoContent();
+            //}
+
+            //var products = _context.Products.Where(x => x.Title.Contains(q));
+            //if(products == null)
+            //{
+            //    return NoContent();
+            //}
+            //string url = "https://localhost:7061/static/Contents/Images/Products/";
+
+            //foreach (var product in products)
+            //{
+            //    product.Image = url + product.Image;
+            //}
+            //return await products.ToListAsync();
+            if (_context.Products == null)
+            {
+                return NotFound();
+            }
             if (string.IsNullOrEmpty(q))
             {
                 return NoContent();
             }
-
-            var products = _context.Products.Where(x => x.Title.Contains(q));
-            if(products == null)
+            var list = _context.Products.Where(x => x.Title.Contains(q));
+            if(list == null)
             {
                 return NoContent();
             }
-            string url = "https://localhost:7061/static/Contents/Images/Products/";
+            var url = "https://localhost:7061/static/Contents/Images/Products/";
 
+            // Tính tổng số sản phẩm
+            var totalProducts = await list.CountAsync();
+
+            // Tính tổng số trang
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
+
+            // Lấy danh sách sản phẩm theo phân trang
+            var products = await list
+                                     .Skip((pageNumber - 1) * pageSize)
+                                         .Take(pageSize)
+                                         .ToListAsync();
+
+            // Gắn URL ảnh vào sản phẩm
             foreach (var product in products)
             {
                 product.Image = url + product.Image;
             }
-            return await products.ToListAsync();
+
+            // Tạo đối tượng trả về bao gồm danh sách sản phẩm và số trang
+            var result = new
+            {
+                Products = products,
+                TotalPages = totalPages,
+                CurrentPage = pageNumber,
+                PageSize = pageSize
+            };
+
+            return Ok(result);
+
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProductByCategoryId(int id)
+        public async Task<ActionResult<Product>> GetProductById(int id)
         {
             if (_context.Products == null)
             {
@@ -130,48 +258,77 @@ namespace Api1.Controllers
         }
         // PUT: api/Products/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, Product product)
+        [HttpPut]
+        public async Task<IActionResult> PutProduct( [FromForm] ProductDTO product)
         {
-            if (id != product.Id)
+            var productt = _context.Products.FirstOrDefault(x => x.Id == product.Id);
+            if (product == null)
             {
                 return BadRequest();
             }
-
-            _context.Entry(product).State = EntityState.Modified;
-
-            try
+            string image = productt.Image;
+            //Xử lý ảnh
+            if (product.Image != null)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
+                var imagePath = Path.Combine("StaticFiles/Contents/Images/Products", product.Image.FileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    await product.Image.CopyToAsync(stream);
+                    image = product.Image.FileName;
                 }
             }
-
+            productt.Title = product.Title;
+            productt.Description = product.Description;
+            productt.Status = product.Status;
+            productt.Detail = product.Detail;
+            productt.Image = image;
+            productt.Price = product.Price;
+            productt.PriceSale = product.PriceSale;
+            productt.Quantity = product.Quantity;
+            productt.isHot = product.isHot;
+            productt.ProductCategoryId = product.ProductCategoryId;
+            _context.SaveChanges();
             return NoContent();
         }
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        [Route("UploadFile")]
+        public async Task<ActionResult<Product>> PostProduct( [FromForm]ProductDTO product)
         {
           if (_context.Products == null)
           {
               return Problem("Entity set 'BanHangContext.Products'  is null.");
           }
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+          
+          //Xử lý ảnh
+          if(product.Image != null)
+            {
+                var imagePath = Path.Combine("StaticFiles/Contents/Images/Products", product.Image.FileName);
 
-            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await product.Image.CopyToAsync(stream);
+                }
+            }
+            var productt = new Product
+            {
+                Title = product.Title,
+                Description = product.Description,
+                Status = product.Status,
+                Detail = product.Detail,
+                Image = product.Image.FileName,
+                Price = product.Price,
+                PriceSale = product.PriceSale,
+                Quantity = product.Quantity,
+                isHot = product.isHot,
+                ProductCategoryId = product.ProductCategoryId
+            };
+            _context.Products.Add(productt);
+            await _context.SaveChangesAsync();
+            return StatusCode(201, "successful");
         }
 
         // DELETE: api/Products/5

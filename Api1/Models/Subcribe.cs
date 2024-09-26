@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api1.Models
 {
+    [Table("Subcribes")]
     public class Subcribe
     {
         [Key]

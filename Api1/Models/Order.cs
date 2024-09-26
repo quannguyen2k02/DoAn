@@ -25,6 +25,6 @@ namespace API.Models
         public int Status { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; }
-        public string CustomerId { set;get; }
+        public string? CustomerId { set;get; }
     }
 }

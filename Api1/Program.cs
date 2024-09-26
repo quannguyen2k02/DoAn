@@ -1,7 +1,7 @@
 using Api1.Data;
 using Api1.Models.Momo;
 using Api1.Repositories;
-
+using Api1.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -64,11 +64,13 @@ builder.Services.AddDbContext<BanHangContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyDb"));
 });
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 //builder.Services.AddControllers()
 //    .AddJsonOptions(options =>
 //    {
 //        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
 //    });
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
