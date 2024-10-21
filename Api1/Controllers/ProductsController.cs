@@ -52,13 +52,13 @@ namespace Api1.Controllers
             var url = "https://localhost:7061/static/Contents/Images/Products/";
 
             // Tính tổng số sản phẩm
-            var totalProducts = await _context.Products.CountAsync();
-
+            var totalProducts = await _context.Products.Where(x=>x.Quantity !=0 ||x.Status ==1).CountAsync();
+            var list = _context.Products.Where(x => x.Quantity != 0 || x.Status == 1);
             // Tính tổng số trang
             var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
 
             // Lấy danh sách sản phẩm theo phân trang
-            var products = await _context.Products
+            var products = await list
                                          .Skip((pageNumber - 1) * pageSize)
                                          .Take(pageSize)
                                          .ToListAsync();
@@ -89,7 +89,7 @@ namespace Api1.Controllers
                 return NotFound();
             }
             var url = "https://localhost:7061/static/Contents/Images/Products/";
-            var list = _context.Products.Where(x => x.isHot == true);
+            var list = _context.Products.Where(x => x.isHot == true && x.Quantity !=0 || x.Status == 1);
             foreach (var product in list)
             {
                 product.Image = url + product.Image;
@@ -106,7 +106,7 @@ namespace Api1.Controllers
                 return NotFound();
             }
             var url = "https://localhost:7061/static/Contents/Images/Products/";
-            var list = _context.Products.OrderByDescending(x => x.Id);
+            var list = _context.Products.Where(x=>x.Quantity != 0 && x.Status ==1 || x.Quantity != 0).OrderByDescending(x => x.Id);
             foreach (var product in list)
             {
                 product.Image = url + product.Image;
@@ -141,9 +141,8 @@ namespace Api1.Controllers
             }
 
             var url = "https://localhost:7061/static/Contents/Images/Products/";
-
             // Lọc sản phẩm theo CategoryId
-            var list = _context.Products.Where(x => x.ProductCategoryId == id);
+            var list = _context.Products.Where(x => x.ProductCategoryId == id );
 
             // Tính tổng số sản phẩm
             var totalProducts = await list.CountAsync();

@@ -43,7 +43,6 @@ namespace Api1.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = AppRole.Customer + "," + AppRole.Admin)]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDTO orderDto)
         {
             var userId = _userManager.GetUserId(User);
@@ -67,7 +66,12 @@ namespace Api1.Controllers
                     Price = _context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.PriceSale ?? 0
                 }).ToList()
             };
-
+            foreach (var item in orderDto.Items)
+            {
+                var product = _context.Products.FirstOrDefault(x => x.Id == item.ProductId);
+                product.Quantity = product.Quantity - item.Quantity;
+                _context.SaveChanges();
+            }
             // Lưu order vào cơ sở dữ liệu
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -154,7 +158,14 @@ namespace Api1.Controllers
                     Quantity = item.Quantity,
                     Price = _context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.PriceSale ?? 0
                 }).ToList()
+                
             };
+            foreach(var item in orderDto.Items)
+            {
+                var product = _context.Products.FirstOrDefault(x=>x.Id == item.ProductId);
+                product.Quantity = product.Quantity - item.Quantity;
+                _context.SaveChanges();
+            }
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             string infor = "Khách hàng: " + order.CustomerName + ". Nội dung: thanh toán ";
@@ -541,6 +552,20 @@ namespace Api1.Controllers
                 return NotFound();
             }
             var listOrder = _context.Orders.Where(x => x.CustomerId == id).OrderByDescending(x => x.CreatedDate);
+            if (listOrder == null)
+            {
+                return NotFound();
+            }
+            return await listOrder.ToListAsync();
+        }
+        [HttpGet("GetOrderByQ/{q}")]
+        public async Task<ActionResult<IEnumerable<Order>>> getOrderByQuery(string q)
+        {
+            if (_context.Orders == null)
+            {
+                return NotFound();
+            }
+            var listOrder = _context.Orders.Where(x => x.Phone == q || x.OrderCode == q);
             if (listOrder == null)
             {
                 return NotFound();

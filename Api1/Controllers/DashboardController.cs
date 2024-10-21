@@ -121,8 +121,60 @@ namespace Api1.Controllers
             return Ok(totalRevenue);
 
         }
+        [HttpGet("GetAllShipping")]
+        public async Task<ActionResult<object>> GetAllShipping()
+        {
+            if (_context.Orders == null)
+            {
+                return NotFound();
+            }
 
-        
+            // Tính tổng số đơn hàng có status = 2
+            var shippingOrders = await _context.Orders
+                .Where(o => o.Status == 2)
+                .ToListAsync();
 
+            var shippingOrdersCount = shippingOrders.Count;
+
+            // Tính tổng số tiền của các đơn hàng đang giao
+            var totalShippingAmount = shippingOrders.Sum(o => o.TotalAmount); // Giả sử đơn hàng có thuộc tính 'TotalAmount' lưu tổng số tiền
+
+            // Trả về đối tượng gồm tổng số đơn hàng đang giao và tổng số tiền
+            var result = new
+            {
+                TotalOrders = shippingOrdersCount,
+                TotalAmount = totalShippingAmount
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("GetAllUnconfirmed")]
+        public async Task<ActionResult<object>> GetAllUnconfirmed()
+        {
+            if (_context.Orders == null)
+            {
+                return NotFound();
+            }
+
+            // Tính tổng số đơn hàng có status = 2
+            var shippingOrders = await _context.Orders
+                .Where(o => o.Status == 0)
+                .ToListAsync();
+
+            var shippingOrdersCount = shippingOrders.Count;
+
+            // Tính tổng số tiền của các đơn hàng đang giao
+            var totalShippingAmount = shippingOrders.Sum(o => o.TotalAmount); // Giả sử đơn hàng có thuộc tính 'TotalAmount' lưu tổng số tiền
+
+            // Trả về đối tượng gồm tổng số đơn hàng đang giao và tổng số tiền
+            var result = new
+            {
+                TotalOrders = shippingOrdersCount,
+                TotalAmount = totalShippingAmount
+            };
+
+            return Ok(result);
+        }
     }
 }
